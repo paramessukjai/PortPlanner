@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PortPlanner">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <!-- ── PWA: Android / Chrome ── -->
 <meta name="mobile-web-app-capable" content="yes">
@@ -933,7 +933,7 @@ initFirebaseListener();
 // ══════════════════════════════════════════════
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/PortPlanner/sw.js', {scope: '/PortPlanner/'})
       .then(reg => console.log('[SW] registered:', reg.scope))
       .catch(err => console.warn('[SW] failed:', err));
   });
