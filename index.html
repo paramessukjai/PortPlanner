@@ -63,12 +63,32 @@
   --c4: #5A48B0; --c5: #9A6000; --c6: #3D7A3A; --c7: #A02828;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; }
-body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── FULLSCREEN / SAFE AREA ── */
+html {
+  font-size: 15px;
+  /* ป้องกัน overscroll สีขาวโผล่ตอนดึงหน้าจอ */
+  overscroll-behavior: none;
+  background: #2A5C45; /* สี accent เพื่อ status bar ดูสวย */
+}
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport height — มือถือ modern */
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: none;
+  /* รองรับ notch / Dynamic Island / home indicator */
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
 /* ── SYNC INDICATOR ── */
 #sync-indicator {
-  position: fixed; bottom: 70px; right: 16px; z-index: 200;
+  position: fixed; bottom: calc(70px + env(safe-area-inset-bottom)); right: 16px; z-index: 200;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 20px; padding: 6px 12px;
   font-size: 12px; color: var(--text2);
@@ -101,6 +121,9 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 12px;
   padding: 0 20px;
+  /* ทำให้ topbar ติดขอบบนจริงๆ แม้มี notch */
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
 }
 .topbar-logo { font-family: var(--font-display); font-size: 1.25rem; color: var(--text); letter-spacing: -.01em; flex: 1; }
 .topbar-logo span { color: var(--accent); font-style: italic; }
@@ -133,7 +156,11 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .bottom-nav {
   position: sticky; bottom: 0; z-index: 100;
   background: var(--surface); border-top: 1px solid var(--border);
-  display: flex; padding: 8px 4px env(safe-area-inset-bottom, 8px);
+  display: flex;
+  /* home indicator bar บน iPhone */
+  padding: 8px 4px max(env(safe-area-inset-bottom), 8px);
+  padding-left: max(4px, env(safe-area-inset-left));
+  padding-right: max(4px, env(safe-area-inset-right));
 }
 .bottom-nav button {
   flex: 1; background: none; border: none; cursor: pointer;
