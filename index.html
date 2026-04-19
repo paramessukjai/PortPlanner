@@ -2,8 +2,30 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Port Planner — พอร์ตการลงทุน</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PortPlanner — พอร์ตการลงทุน</title>
+
+<!-- ── PWA: Web App Manifest ── -->
+<link rel="manifest" href="manifest.json">
+
+<!-- ── PWA: iOS / Safari ── -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PortPlanner">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- ── PWA: Android / Chrome ── -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2A5C45">
+<meta name="application-name" content="PortPlanner">
+
+<!-- ── SEO / Share ── -->
+<meta name="description" content="ติดตามพอร์ตหุ้นส่วนตัว พร้อม Rebalance อัตโนมัติ">
+<meta property="og:title" content="PortPlanner">
+<meta property="og:description" content="ติดตามพอร์ตหุ้นส่วนตัว พร้อม Rebalance อัตโนมัติ">
+<meta property="og:type" content="website">
+
+<!-- ── Fonts & Libraries ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -878,6 +900,17 @@ function renderPie(){
 //  INIT
 // ══════════════════════════════════════════════
 initFirebaseListener();
+
+// ══════════════════════════════════════════════
+//  SERVICE WORKER REGISTRATION (PWA)
+// ══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[SW] registered:', reg.scope))
+      .catch(err => console.warn('[SW] failed:', err));
+  });
+}
 </script>
 </body>
 </html>
