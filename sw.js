@@ -4,11 +4,11 @@ const CACHE_VERSION = 'v1.0.0';
 const CACHE_NAME    = `portplanner-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/PortPlanner/',
+  '/PortPlanner/index.html',
+  '/PortPlanner/manifest.json',
+  '/PortPlanner/icon-192.png',
+  '/PortPlanner/icon-512.png',
   'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js',
 ];
@@ -58,7 +58,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('/PortPlanner/index.html');
         }
       });
     })
