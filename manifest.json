@@ -1,14 +1,14 @@
 {
-  "name": "PortPlanner — พอร์ตการลงทุน",
+  "name": "PortPlanner",
   "short_name": "PortPlanner",
-  "description": "ติดตามพอร์ตหุ้นส่วนตัว พร้อม Rebalance อัตโนมัติ",
-  "start_url": "/",
+  "description": "Portfolio Tracker",
+  "start_url": "/PortPlanner/",
+  "scope": "/PortPlanner/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#F5F2EE",
   "theme_color": "#2A5C45",
   "lang": "th",
-  "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "icon-192.png",
@@ -21,19 +21,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [],
-  "shortcuts": [
-    {
-      "name": "กำไร / ขาดทุน",
-      "url": "/#pnl",
-      "description": "ดูกำไรขาดทุนรายหุ้น"
-    },
-    {
-      "name": "สรุปพอร์ต",
-      "url": "/#summary",
-      "description": "ภาพรวมพอร์ตทั้งหมด"
     }
   ]
 }
