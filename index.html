@@ -733,7 +733,7 @@ function setMonthDraft(mi, val){
   const key = `${year}-${mi}`;
   if (!monthData[key]) monthData[key] = {};
   monthData[key].draft = val;
-  // don't save to firebase yet — only on confirm
+  saveToFirebase(); // บันทึก draft ทันที เพื่อให้มือถือเห็นด้วย
 }
 function confirmMonth(mi){
   const key = `${year}-${mi}`;
