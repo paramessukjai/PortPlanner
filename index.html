@@ -35,6 +35,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <style>
 :root {
@@ -322,9 +323,181 @@ tr:last-child td { border-bottom: none; }
   .main { padding: 16px 14px; }
   .page-title { font-size: 1.5rem; }
 }
+
+/* ══ AUTH OVERLAY ══════════════════════════════ */
+#auth-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  padding-top: max(24px, env(safe-area-inset-top));
+}
+.auth-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px 28px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.08);
+}
+.auth-logo {
+  font-family: var(--font-display); font-size: 2rem;
+  color: var(--text); text-align: center; margin-bottom: 4px;
+}
+.auth-logo span { color: var(--accent); font-style: italic; }
+.auth-tagline { font-size: 13px; color: var(--text3); text-align: center; margin-bottom: 28px; }
+.auth-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+.auth-tab {
+  flex: 1; padding: 8px; border: none; border-radius: 8px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  cursor: pointer; background: transparent; color: var(--text2);
+  transition: background .2s, color .2s;
+}
+.auth-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.auth-field { margin-bottom: 14px; }
+.auth-field label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; }
+.auth-field input {
+  width: 100%; font-family: var(--font-body); font-size: 14px;
+  padding: 10px 14px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--bg); color: var(--text);
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.auth-field input:focus { border-color: var(--accent-mid); box-shadow: 0 0 0 3px rgba(42,92,69,.1); }
+.auth-btn-main {
+  width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm);
+  background: var(--accent); color: #fff;
+  font-family: var(--font-body); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: background .15s;
+  margin-bottom: 12px;
+}
+.auth-btn-main:hover { background: var(--accent-mid); }
+.auth-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.auth-divider span { font-size: 12px; color: var(--text3); }
+.auth-social { display: flex; flex-direction: column; gap: 8px; }
+.auth-social-btn {
+  width: 100%; padding: 10px 16px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--surface);
+  font-family: var(--font-body); font-size: 14px; color: var(--text);
+  cursor: pointer; transition: background .15s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.auth-social-btn:hover { background: var(--surface2); }
+.auth-social-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+.auth-error {
+  background: var(--red-light); border: 1px solid var(--red);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-size: 13px; color: var(--red); margin-bottom: 14px; display: none;
+}
+.auth-forgot { font-size: 12px; color: var(--accent); cursor: pointer; text-align: right; display: block; margin-top: -8px; margin-bottom: 14px; }
+
+/* ── USER MENU ── */
+.user-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px 4px 5px;
+  cursor: pointer; font-size: 13px; color: var(--text2);
+  transition: background .15s;
+}
+.user-chip:hover { background: var(--border); }
+.user-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; flex-shrink: 0; overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-menu-dropdown {
+  position: absolute; top: calc(var(--header-h) + 4px); right: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  z-index: 300; min-width: 220px; overflow: hidden; display: none;
+}
+.user-menu-dropdown.open { display: block; }
+.user-menu-item {
+  padding: 12px 16px; font-size: 14px; color: var(--text2);
+  cursor: pointer; transition: background .12s; display: flex; align-items: center; gap: 10px;
+}
+.user-menu-item:hover { background: var(--surface2); color: var(--text); }
+.user-menu-item.danger { color: var(--red); }
+.user-menu-sep { height: 1px; background: var(--border); }
+.user-menu-header { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.user-menu-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.user-menu-email { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
 </style>
 </head>
 <body>
+<!-- ══ AUTH OVERLAY ══════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">Port<span>Planner</span></div>
+    <div class="auth-tagline">ติดตามพอร์ตหุ้น · ซิงก์ทุกอุปกรณ์</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">สมัครสมาชิก</button>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+
+    <!-- Login -->
+    <div id="auth-login-form">
+      <div class="auth-field">
+        <label>อีเมล</label>
+        <input type="email" id="login-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <span class="auth-forgot" onclick="doForgotPassword()">ลืมรหัสผ่าน?</span>
+      <button class="auth-btn-main" onclick="doLogin()">เข้าสู่ระบบ</button>
+    </div>
+
+    <!-- Register -->
+    <div id="auth-register-form" style="display:none">
+      <div class="auth-field">
+        <label>ชื่อที่แสดง</label>
+        <input type="text" id="reg-name" placeholder="ชื่อของคุณ" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label>อีเมล</label>
+        <input type="email" id="reg-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label>
+        <input type="password" id="reg-password" placeholder="••••••••" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <button class="auth-btn-main" onclick="doRegister()">สมัครสมาชิก</button>
+    </div>
+
+    <div class="auth-divider"><span>หรือเข้าผ่าน</span></div>
+    <div class="auth-social">
+      <button class="auth-social-btn" onclick="doGoogleLogin()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        เข้าสู่ระบบด้วย Google
+      </button>
+      <button class="auth-social-btn" onclick="doFacebookLogin()">
+        <svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        เข้าสู่ระบบด้วย Facebook
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── USER DROPDOWN MENU ── -->
+<div id="user-menu-dropdown" class="user-menu-dropdown">
+  <div class="user-menu-header">
+    <div class="user-menu-name" id="menu-display-name">—</div>
+    <div class="user-menu-email" id="menu-email">—</div>
+  </div>
+  <div class="user-menu-item danger" onclick="doSignOut()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    ออกจากระบบ
+  </div>
+</div>
+
 <div class="app">
 
 <!-- SYNC INDICATOR -->
@@ -338,6 +511,10 @@ tr:last-child td { border-bottom: none; }
   <div class="topbar-logo">Port<span>Planner</span></div>
   <div class="topbar-budget">
     งบ/เดือน <strong id="tb-budget">10,000</strong> บ.
+  </div>
+  <div class="user-chip" id="user-chip" onclick="toggleUserMenu()" style="display:none">
+    <div class="user-avatar" id="user-avatar">?</div>
+    <span id="user-chip-name">—</span>
   </div>
 </header>
 
@@ -562,8 +739,9 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
-const db = firebase.database();
-const dataRef = db.ref('portfolio/v1');
+const db   = firebase.database();
+const auth = firebase.auth();
+let dataRef = null;  // จะถูกตั้งค่าหลัง login
 
 // ══════════════════════════════════════════════
 //  STATE
@@ -605,6 +783,7 @@ function showSync(state, text) {
 //  FIREBASE: SAVE (debounced 600ms)
 // ══════════════════════════════════════════════
 function saveToFirebase() {
+  if (!dataRef) return;  // ยังไม่ได้ login
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => {
     _isSaving = true;  // ล็อกไม่ให้ listener re-render ขณะเราเซฟ
@@ -633,7 +812,8 @@ function saveToFirebase() {
 // ══════════════════════════════════════════════
 //  FIREBASE: LOAD (realtime listener)
 // ══════════════════════════════════════════════
-function initFirebaseListener() {
+function initFirebaseListener(uid) {
+  dataRef = db.ref('users/' + uid + '/portfolio/v1');
   showSync('syncing', 'กำลังโหลดข้อมูล…');
   dataRef.on('value', snapshot => {
     if (_isSaving) return;   // skip our own writes
@@ -1191,9 +1371,146 @@ function renderPie(){
 }
 
 // ══════════════════════════════════════════════
-//  INIT
+//  AUTH FUNCTIONS
 // ══════════════════════════════════════════════
-initFirebaseListener();
+let _authListenerRemoved = false;
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
+  });
+  document.getElementById('auth-login-form').style.display    = tab==='login'    ? '' : 'none';
+  document.getElementById('auth-register-form').style.display = tab==='register' ? '' : 'none';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+function getThaiAuthError(code) {
+  const map = {
+    'auth/user-not-found':      'ไม่พบบัญชีนี้ กรุณาสมัครสมาชิกก่อน',
+    'auth/wrong-password':      'รหัสผ่านไม่ถูกต้อง',
+    'auth/invalid-credential':  'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    'auth/email-already-in-use':'อีเมลนี้ถูกใช้แล้ว กรุณาเข้าสู่ระบบแทน',
+    'auth/weak-password':       'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+    'auth/invalid-email':       'รูปแบบอีเมลไม่ถูกต้อง',
+    'auth/too-many-requests':   'ลองใหม่ภายหลัง (ลองหลายครั้งเกินไป)',
+    'auth/popup-closed-by-user':'ปิด popup ก่อนเสร็จ กรุณาลองใหม่',
+    'auth/cancelled-popup-request': 'ยกเลิก กรุณาลองใหม่',
+    'auth/account-exists-with-different-credential': 'อีเมลนี้ผูกกับวิธีเข้าสู่ระบบอื่นอยู่แล้ว',
+  };
+  return map[code] || 'เกิดข้อผิดพลาด: ' + code;
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  if (!email||!pass) { showAuthError('กรุณากรอกอีเมลและรหัสผ่าน'); return; }
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(e => showAuthError(getThaiAuthError(e.code)));
+}
+
+function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-password').value;
+  if (!name||!email||!pass) { showAuthError('กรุณากรอกข้อมูลให้ครบ'); return; }
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(cred => cred.user.updateProfile({ displayName: name }))
+    .catch(e => showAuthError(getThaiAuthError(e.code)));
+}
+
+function doGoogleLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .catch(e => showAuthError(getThaiAuthError(e.code)));
+}
+
+function doFacebookLogin() {
+  const provider = new firebase.auth.FacebookAuthProvider();
+  auth.signInWithPopup(provider)
+    .catch(e => showAuthError(getThaiAuthError(e.code)));
+}
+
+function doForgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showAuthError('กรอกอีเมลก่อน แล้วกด "ลืมรหัสผ่าน" อีกครั้ง'); return; }
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      document.getElementById('auth-error').style.display = '';
+      document.getElementById('auth-error').style.background = 'var(--accent-light)';
+      document.getElementById('auth-error').style.borderColor = 'var(--accent)';
+      document.getElementById('auth-error').style.color = 'var(--accent)';
+      document.getElementById('auth-error').textContent = 'ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ ' + email + ' แล้ว';
+    })
+    .catch(e => showAuthError(getThaiAuthError(e.code)));
+}
+
+function doSignOut() {
+  auth.signOut();
+  toggleUserMenu(false);
+}
+
+function toggleUserMenu(forceClose) {
+  const dd = document.getElementById('user-menu-dropdown');
+  if (forceClose === false || dd.classList.contains('open')) {
+    dd.classList.remove('open');
+  } else {
+    dd.classList.add('open');
+  }
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#user-chip') && !e.target.closest('#user-menu-dropdown')) {
+    document.getElementById('user-menu-dropdown').classList.remove('open');
+  }
+});
+
+function onUserSignedIn(user) {
+  // Hide auth overlay
+  document.getElementById('auth-overlay').style.display = 'none';
+
+  // Show user chip
+  const chip   = document.getElementById('user-chip');
+  const avatar = document.getElementById('user-avatar');
+  const name   = user.displayName || user.email.split('@')[0];
+  chip.style.display = '';
+  document.getElementById('user-chip-name').textContent = name.split(' ')[0];
+  document.getElementById('menu-display-name').textContent = user.displayName || name;
+  document.getElementById('menu-email').textContent = user.email || '';
+  if (user.photoURL) {
+    avatar.innerHTML = `<img src="${user.photoURL}" alt="">`;
+  } else {
+    avatar.textContent = name.charAt(0).toUpperCase();
+  }
+
+  // Start per-user Firebase listener
+  initFirebaseListener(user.uid);
+}
+
+function onUserSignedOut() {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('user-chip').style.display = 'none';
+  // Stop old listener
+  if (dataRef) { dataRef.off(); dataRef = null; }
+  // Reset state
+  stocks    = [{name:'หุ้น A',pct:40,cap:null},{name:'หุ้น B',pct:60,cap:null}];
+  monthData = {};
+  pnlData   = {0:{totalCost:0,curValue:0},1:{totalCost:0,curValue:0}};
+  initRender();
+}
+
+// ── Firebase Auth State Observer ──
+auth.onAuthStateChanged(user => {
+  if (user) {
+    onUserSignedIn(user);
+  } else {
+    onUserSignedOut();
+  }
+});
 
 // ══════════════════════════════════════════════
 //  SERVICE WORKER REGISTRATION (PWA)
