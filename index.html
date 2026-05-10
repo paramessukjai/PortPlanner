@@ -443,6 +443,8 @@ tr:last-child td { border-bottom: none; }
       สมัครและเข้าสู่ระบบด้วย Google account<br>ข้อมูลพอร์ตจะบันทึกและซิงก์อัตโนมัติ
     </p>
   </div>
+</div>
+
 <!-- ── USER DROPDOWN MENU ── -->
 <div id="user-menu-dropdown" class="user-menu-dropdown">
   <div class="user-menu-header">
@@ -1332,7 +1334,6 @@ function renderPie(){
 // ══════════════════════════════════════════════
 let _authListenerRemoved = false;
 
-
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -1355,30 +1356,9 @@ function getThaiAuthError(code) {
   return map[code] || 'เกิดข้อผิดพลาด: ' + code;
 }
 
-  auth.signInWithEmailAndPassword(email, pass)
-    .catch(e => showAuthError(getThaiAuthError(e.code)));
-}
-
-  auth.createUserWithEmailAndPassword(email, pass)
-    .then(cred => cred.user.updateProfile({ displayName: name }))
-    .catch(e => showAuthError(getThaiAuthError(e.code)));
-}
-
 function doGoogleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
-    .catch(e => showAuthError(getThaiAuthError(e.code)));
-}
-
-
-  auth.sendPasswordResetEmail(email)
-    .then(() => {
-      document.getElementById('auth-error').style.display = '';
-      document.getElementById('auth-error').style.background = 'var(--accent-light)';
-      document.getElementById('auth-error').style.borderColor = 'var(--accent)';
-      document.getElementById('auth-error').style.color = 'var(--accent)';
-      document.getElementById('auth-error').textContent = 'ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ ' + email + ' แล้ว';
-    })
     .catch(e => showAuthError(getThaiAuthError(e.code)));
 }
 
