@@ -1,6 +1,6 @@
 // PortPlanner Service Worker
 // เปลี่ยน CACHE_VERSION ทุกครั้งที่ deploy ใหม่
-const CACHE_VERSION = 'v1.0.5';
+const CACHE_VERSION = 'v1.0.6';
 const CACHE_NAME    = 'portplanner-' + CACHE_VERSION;
 
 const PRECACHE_URLS = [
